@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 
 import { FormInput } from "./form-input";
 import { FormSubmit } from "./form-submit";
+import { toast } from "sonner";
 
 interface FormPopOverProps {
   children: React.ReactNode;
@@ -32,9 +33,11 @@ const FormPopOver = ({
   const { execute, fieldErrors } = useAction(createBoard, {
     onSuccess: (data) => {
       console.log(data, "success");
+      toast.success("Board created!");
     },
     onError: (error) => {
       console.log(error, "error");
+      toast.error(error);
     },
   });
 
