@@ -1,0 +1,65 @@
+"use client";
+
+import { useState, useCallback } from "react";
+
+import { ActionState, FieldErrors } from "@/lib/create-safe-action";
+
+type Action<TInput, TOutput> = (
+  data: TInput
+) => Promise<ActionState<TInput, TOutput>>;
+
+interface UseActionOptions<TOutput> {
+  onSuccess?: (result: TOutput) => void;
+  onError?: (error: string) => void;
+  onCompleted?: () => void;
+}
+
+export const useAction = <TInput, TOutput>(
+  action: Action<TInput, TOutput>,
+  options: UseActionOptions<TOutput> = {}
+) => {
+  const [fieldErrors, setFieldErrors] = useState<
+    FieldErrors<TInput> | undefined
+  >(undefined);
+
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [result, setResult] = useState<TOutput | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const execute = useCallback(
+    async (data: TInput) => {
+      setIsLoading(true);
+      try {
+        const result = await action(data);
+
+        if (!result) {
+          return;
+        }
+
+        setFieldErrors(result.fieldErrors);
+
+        if (result.error) {
+          setError(result.error);
+          options.onError?.(result.error);
+        }
+
+        if (result.result) {
+          setResult(result.result);
+          options.onSuccess?.(result.result);
+        }
+      } finally {
+        setIsLoading(false);
+        options.onCompleted?.();
+      }
+    },
+    [action, options]
+  );
+
+  return {
+    fieldErrors,
+    error,
+    result,
+    isLoading,
+    execute,
+  };
+};
