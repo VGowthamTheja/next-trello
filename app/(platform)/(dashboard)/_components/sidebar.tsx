@@ -52,7 +52,16 @@ const Sidebar = ({ storageKey = "t-sidebar-state" }: SidebarProps) => {
   if (!isLoadedOrg || !isLoadedOrgList || userMemberships.isLoading) {
     return (
       <>
-        <Skeleton className="h-10 w-full" />
+        <div className="flex items-center justify-between mb-2">
+          <Skeleton className="bg-gray-200 h-10 w-[50%]" />
+          <Skeleton className="h-10 w-10 bg-gray-200" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="bg-gray-200 h-10 w-full" />
+          <Skeleton className="bg-gray-200 h-10 w-full" />
+          <Skeleton className="bg-gray-200 h-10 w-full" />
+          <Skeleton className="bg-gray-200 h-10 w-full" />
+        </div>
       </>
     );
   }
