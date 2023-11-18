@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 
 import { InputType, ReturnType } from "./types";
-import { UpdateBoardSchema } from "./schema";
+import { UpdateListSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = auth();
@@ -16,15 +16,18 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Unauthorized" };
   }
 
-  const { id, title } = data;
+  const { id, title, boardId } = data;
 
-  let board;
+  let list;
 
   try {
-    board = await db.board.update({
+    list = await db.list.update({
       where: {
         id,
-        orgId,
+        boardId,
+        board: {
+          orgId,
+        },
       },
       data: {
         title,
@@ -34,8 +37,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: error.message };
   }
 
-  revalidatePath(`/board/${id}`);
-  return { result: board };
+  revalidatePath(`/board/${boardId}`);
+  return { result: list };
 };
 
-export const updateBoard = createSafeAction(UpdateBoardSchema, handler);
+export const updateList = createSafeAction(UpdateListSchema, handler);
