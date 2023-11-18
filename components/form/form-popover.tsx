@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { ElementRef, useRef } from "react";
 import { X } from "lucide-react";
 
 import {
@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "./form-input";
 import { FormSubmit } from "./form-submit";
 import { toast } from "sonner";
+import FormPicker from "./form-picker";
+import { useRouter } from "next/navigation";
 
 interface FormPopOverProps {
   children: React.ReactNode;
@@ -30,20 +32,23 @@ const FormPopOver = ({
   side = "bottom",
   sideOffset = 0,
 }: FormPopOverProps) => {
+  const closeRef = useRef<ElementRef<"button">>(null);
+  const router = useRouter();
   const { execute, fieldErrors } = useAction(createBoard, {
     onSuccess: (data) => {
-      console.log(data, "success");
       toast.success("Board created!");
+      closeRef.current?.click();
+      router.push(`/board/${data.id}`);
     },
     onError: (error) => {
-      console.log(error, "error");
       toast.error(error);
     },
   });
 
   const onSubmit = (formData: FormData) => {
     const title = formData.get("title") as string;
-    execute({ title });
+    const image = formData.get("image") as string;
+    execute({ title, image });
   };
 
   return (
@@ -58,7 +63,7 @@ const FormPopOver = ({
         <div className="text-sm font-medium text-center text-neutral-600 pb-4">
           Create board
         </div>
-        <PopoverClose>
+        <PopoverClose asChild ref={closeRef}>
           <Button
             className="h-auto w-auto p-2 absolute top-2 right-2 text-gray-600 hover:text-rose-500 transition"
             variant={"ghost"}
@@ -68,6 +73,7 @@ const FormPopOver = ({
         </PopoverClose>
         <form action={onSubmit} className="space-y-4">
           <div className="space-y-4">
+            <FormPicker id="image" errors={fieldErrors} />
             <FormInput
               errors={fieldErrors}
               id="title"
